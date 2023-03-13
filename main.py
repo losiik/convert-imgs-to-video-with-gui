@@ -5,6 +5,8 @@ import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_ALL
 import os
 import cv2
+from PIL import Image
+from natsort import natsorted
 
 
 class Tk(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -22,16 +24,21 @@ app.geometry("400x240")
 
 def generate_video(link, fps=25):
     try:
+        print('link: ', link)
+        link = link.replace('file:/', '')
         image_folder = '.'  # make sure to use your folder
         video_name = 'new_video.mp4'
         os.chdir(link)
         num_of_images = len(os.listdir('.'))
 
-        img_name = os.listdir('.')[0]
-        img_name = img_name.split('1')
         images = []
-        for i in range(1, num_of_images + 1):
-            images.append(f'{img_name[0]}{i}{img_name[1]}')
+
+        for file in os.listdir('.'):
+            img = file
+            images.append(img)
+
+        print(images)
+        images = natsorted(images)
 
         print(images)
         # Array images should only consider
