@@ -1,11 +1,9 @@
-import time
 import tkinter
 import customtkinter
 import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_ALL
 import os
 import cv2
-from PIL import Image
 from natsort import natsorted
 
 
