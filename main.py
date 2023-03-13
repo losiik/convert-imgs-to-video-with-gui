@@ -1,4 +1,5 @@
 import tkinter
+import tkinter.messagebox as mb
 import customtkinter
 import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_ALL
@@ -69,7 +70,11 @@ def button_function():
     link = link_field.get()
     fps = fps_field.get()
     print(link)
-    print(generate_video(link, fps))
+    if generate_video(link, fps):
+        msg = "Видео успешно создано"
+    else:
+        msg = "Во время создания видео произошла ошибка"
+    mb.showinfo("Информация", msg)
 
 
 def get_path(event):
@@ -99,5 +104,7 @@ button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 progressbar = ctk.CTkProgressBar(app)
 progressbar.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)
 progressbar.set(0)
+
+
 
 app.mainloop()
