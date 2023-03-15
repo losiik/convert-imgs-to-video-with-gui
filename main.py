@@ -6,6 +6,7 @@ from tkinterdnd2 import TkinterDnD, DND_ALL
 import os
 import cv2
 from natsort import natsorted
+import pathlib, os.path
 
 
 class Tk(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -20,13 +21,30 @@ customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-bl
 app = Tk()  # create CTk window like you do with the Tk window
 app.geometry("400x240")
 
+appdir = pathlib.Path(__file__).parent.resolve()
+app.iconbitmap(os.path.join(appdir, 'ImgToVideoLogo.ico'))
+app.title('ImgToVideo')
+#icon = tkinter.PhotoImage(file="ImgToVideoLogo.png")
+#app.iconphoto(False, icon)
+
+
+def common(file1_name, file2_name):
+    def _iter():
+        for a, b in zip(file1_name, file2_name):
+            if a == b:
+                yield a
+            else:
+                return
+
+    return ''.join(_iter())
+
 
 def generate_video(link, fps=25):
     try:
         print('link: ', link)
         link = link.replace('file:/', '')
         image_folder = '.'  # make sure to use your folder
-        video_name = 'new_video.mp4'
+
         os.chdir(link)
         num_of_images = len(os.listdir('.'))
 
@@ -42,6 +60,8 @@ def generate_video(link, fps=25):
         print(images)
         # Array images should only consider
         # the image files ignoring others if any
+
+        video_name = common(file1_name=images[0], file2_name=images[1]) + '.mp4'
 
         frame = cv2.imread(os.path.join(image_folder, images[0]))
 
@@ -104,7 +124,5 @@ button.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 progressbar = ctk.CTkProgressBar(app)
 progressbar.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)
 progressbar.set(0)
-
-
 
 app.mainloop()
