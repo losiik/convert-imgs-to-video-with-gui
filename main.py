@@ -7,6 +7,7 @@ import os
 import cv2
 from natsort import natsorted
 import pathlib, os.path
+from os import startfile
 
 
 class Tk(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -24,8 +25,10 @@ app.geometry("400x240")
 appdir = pathlib.Path(__file__).parent.resolve()
 app.iconbitmap(os.path.join(appdir, 'ImgToVideoLogo.ico'))
 app.title('ImgToVideo')
-#icon = tkinter.PhotoImage(file="ImgToVideoLogo.png")
-#app.iconphoto(False, icon)
+
+video_name = ''
+file_name = os.getcwd() + 'img_to_video_settings_file.txt'
+folder_link = ''
 
 
 def common(file1_name, file2_name):
@@ -40,6 +43,8 @@ def common(file1_name, file2_name):
 
 
 def generate_video(link, fps=25):
+    global video_name
+
     try:
         print('link: ', link)
         link = link.replace('file:/', '')
@@ -87,20 +92,55 @@ def generate_video(link, fps=25):
 
 
 def button_function():
-    link = link_field.get()
+    global folder_link
+
+    folder_link = link_field.get()
     fps = fps_field.get()
-    print(link)
-    if generate_video(link, fps):
+
+    file = open(file_name, 'w')
+    file.write(fps)
+    file.close()
+
+    fps = int(fps)
+    print(folder_link)
+    generated_video = generate_video(folder_link, fps)
+    if generated_video:
         msg = "Видео успешно создано"
+
+        button_show_folder = ctk.CTkButton(master=app, text="Открыть папку", command=button_show_folder_function)
+        button_show_folder.place(relx=0.3, rely=0.9, anchor=tkinter.CENTER)
+        button_show_video = ctk.CTkButton(master=app, text="Посмотреть видео", command=button_show_video_function)
+        button_show_video.place(relx=0.7, rely=0.9, anchor=tkinter.CENTER)
     else:
         msg = "Во время создания видео произошла ошибка"
     mb.showinfo("Информация", msg)
 
 
+def button_show_folder_function():
+    os.startfile(folder_link)
+
+
+def button_show_video_function():
+    startfile(video_name)
+
+
 def get_path(event):
+    link_field.delete(0, 'end')
     print(event.data)
     link_field.insert(0, event.data)
 
+
+def callback(event):
+    app.after(50, select_all, event.widget)
+
+
+def select_all(widget):
+    widget.select_range(0, 'end')
+    widget.icursor('end')
+
+
+app.drop_target_register(DND_ALL)
+app.dnd_bind("<<Drop>>", get_path)
 
 link_label = ctk.CTkLabel(app, text="Введите путь до файла с изображениями")
 link_label.place(relx=0.5, rely=0.15, anchor=tkinter.CENTER)
@@ -110,11 +150,24 @@ link_field.place(relx=0.5, rely=0.3, anchor=tkinter.CENTER)
 
 link_field.drop_target_register(DND_ALL)
 link_field.dnd_bind("<<Drop>>", get_path)
+link_field.bind('<Control-a>', callback)
 
 fps_label = ctk.CTkLabel(app, text="fps")
 fps_label.place(relx=0.2, rely=0.45, anchor=tkinter.CENTER)
 
-fps_field = ctk.CTkEntry(app)
+file = open(file_name, 'a+')
+file.seek(0)
+fps_str = file.readline()
+
+OptionList = [
+     '24',
+     '25',
+     '30',
+     '60'
+    ]
+
+fps_field = ctk.CTkComboBox(app, values=OptionList)
+fps_field.set(fps_str)
 fps_field.place(relx=0.5, rely=0.45, anchor=tkinter.CENTER)
 
 # Use CTkButton instead of tkinter Button
@@ -125,4 +178,5 @@ progressbar = ctk.CTkProgressBar(app)
 progressbar.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)
 progressbar.set(0)
 
+app.bind('<Return>', lambda event=None: button.invoke())
 app.mainloop()
